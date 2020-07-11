@@ -9,6 +9,7 @@ public class BlueCentralManager: NSObject, ObservableObject {
     CBCentralManager(delegate: self, queue: nil)
   }()
   public private(set) var selectedPeripheral: CBPeripheral?
+  var selectedCharacteristic: CBCharacteristic?
 
   func discoverPeripherals() {
     let connected = central.retrieveConnectedPeripherals(withServices: [])
@@ -18,6 +19,21 @@ public class BlueCentralManager: NSObject, ObservableObject {
       central.scanForPeripherals(withServices: [PeripheralService.serviceUUID],
                                  options: [CBCentralManagerScanOptionAllowDuplicatesKey: true])
     }
+  }
+
+  func disconnectSelectedPeripheral() {
+    guard let selected = selectedPeripheral,
+          case .connected = selected.state else { return }
+    (selected.services ?? []).forEach { service in
+      (service.characteristics ?? []).forEach { characteristic in
+        if characteristic.uuid == PeripheralService.characteristicUUID,
+           characteristic.isNotifying {
+          self.selectedPeripheral?.setNotifyValue(false, for: characteristic)
+        }
+      }
+    }
+    central.cancelPeripheralConnection(selected)
+    //selectedPeripheral = nil
   }
 }
 
@@ -89,32 +105,73 @@ extension BlueCentralManager: CBPeripheralDelegate {
   public func peripheralDidUpdateName(_ peripheral: CBPeripheral) {
     os_log("Peripheral did update name to: %@", peripheral.name ?? "no name")
   }
-  public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
-    os_log("Peripheral did modify services")
+
+  public func peripheral(_ peripheral: CBPeripheral,
+                         didModifyServices invalidatedServices: [CBService]) {
+    for service in invalidatedServices
+    where service.uuid == PeripheralService.serviceUUID {
+      os_log("Peripheral did invalidate services")
+      peripheral.discoverServices([PeripheralService.serviceUUID])
+    }
   }
+
+  public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    guard error == nil else {
+      os_log("Discovered peripheral services ERROR: %@", error!.localizedDescription)
+      disconnectSelectedPeripheral()
+      return
+    }
+    guard let services = peripheral.services, services.count > 0 else {
+      os_log("Discovered peripheral without services")
+      return
+    }
+    os_log("Peripheral did discover services")
+    services.forEach {
+      peripheral.discoverCharacteristics([PeripheralService.characteristicUUID], for: $0)
+    }
+  }
+
+  public func peripheral(_ peripheral: CBPeripheral,
+                         didDiscoverCharacteristicsFor service: CBService,
+                         error: Error?) {
+    guard error == nil else {
+      os_log("Discovered peripheral service characteristics ERROR: %@", error!.localizedDescription)
+      disconnectSelectedPeripheral()
+      return
+    }
+    guard let characteristics = service.characteristics, characteristics.count > 0 else {
+      os_log("Discovered peripheral service without characteristics")
+      return
+    }
+    for characteristic in characteristics {
+      if characteristic.uuid != PeripheralService.characteristicUUID {
+        os_log("Discovered peripheral service characteristic ignored: %@", characteristic.uuid)
+        continue
+      }
+      os_log("Subscribing to peripheral service characteristic: %@", characteristic.uuid)
+      selectedCharacteristic = characteristic
+      peripheral.setNotifyValue(true, for: characteristic)
+    }
+  }
+
+  public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+    os_log("Peripheral did update notifications")
+  }
+
   public func peripheralDidUpdateRSSI(_ peripheral: CBPeripheral, error: Error?) {
     os_log("Peripheral did update RSSI")
   }
   public func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
     os_log("Peripheral did read RSSI")
   }
-  public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-    os_log("Peripheral did discover services: ")
-  }
   public func peripheral(_ peripheral: CBPeripheral, didDiscoverIncludedServicesFor service: CBService, error: Error?) {
     os_log("Peripheral did discover included services")
-  }
-  public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-    os_log("Peripheral did discover characteristics")
   }
   public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
     os_log("Peripheral did update value for characteristic")
   }
   public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
     os_log("Peripheral did write value for characteristic")
-  }
-  public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-    os_log("Peripheral did update notifications")
   }
   public func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
     os_log("Peripheral did discover descriptor")

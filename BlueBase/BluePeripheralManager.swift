@@ -29,6 +29,7 @@ public class BluePeripheralManager: NSObject, ObservableObject {
 
 
 extension BluePeripheralManager: CBPeripheralManagerDelegate {
+
   public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
     os_log("Bluetooth status: %@", peripheral.state.string)
     switch peripheral.state {
