@@ -8,13 +8,20 @@ public class BlueCentralManager: NSObject, ObservableObject {
   public private(set) lazy var central: CBCentralManager = {
     CBCentralManager(delegate: self, queue: nil)
   }()
-  public private(set) var selectedPeripheral: CBPeripheral?
-  var selectedCharacteristic: CBCharacteristic?
+  @Published public private(set) var selectedPeripheral: CBPeripheral?
+  @Published public private(set) var selectedCharacteristic: CBCharacteristic?
+  private var connectionCount = 0
+  private var writeCount = 0
+  private let maxActionCount = 5
+  private var data = Data()
 
   func discoverPeripherals() {
-    let connected = central.retrieveConnectedPeripherals(withServices: [])
-    if let first = connected.first {
-      print(first)
+    let connected = central
+      .retrieveConnectedPeripherals(withServices: [PeripheralService.serviceUUID])
+    if let lastConnected = connected.last {
+      os_log("%@ : found connected peripherals. Connecting to last.")
+      selectedPeripheral = lastConnected
+      central.connect(selectedPeripheral!, options: nil)
     } else {
       central.scanForPeripherals(withServices: [PeripheralService.serviceUUID],
                                  options: [CBCentralManagerScanOptionAllowDuplicatesKey: true])
@@ -24,8 +31,8 @@ public class BlueCentralManager: NSObject, ObservableObject {
   func disconnectSelectedPeripheral() {
     guard let selected = selectedPeripheral,
           case .connected = selected.state else { return }
-    (selected.services ?? []).forEach { service in
-      (service.characteristics ?? []).forEach { characteristic in
+    for service in selected.services ?? [] {
+      for characteristic in service.characteristics ?? [] {
         if characteristic.uuid == PeripheralService.characteristicUUID,
            characteristic.isNotifying {
           self.selectedPeripheral?.setNotifyValue(false, for: characteristic)
@@ -33,7 +40,6 @@ public class BlueCentralManager: NSObject, ObservableObject {
       }
     }
     central.cancelPeripheralConnection(selected)
-    //selectedPeripheral = nil
   }
 }
 
@@ -41,7 +47,7 @@ public class BlueCentralManager: NSObject, ObservableObject {
 extension BlueCentralManager: CBCentralManagerDelegate {
 
   public func centralManagerDidUpdateState(_ central: CBCentralManager) {
-    os_log("Bluetooth status: %@", central.state.string)
+    os_log("Central updated state: %@", central.state.string)
     switch central.state {
     case .unknown:      ()
     case .resetting:    ()
@@ -58,7 +64,7 @@ extension BlueCentralManager: CBCentralManagerDelegate {
                              advertisementData: [String : Any],
                              rssi RSSI: NSNumber) {
     if selectedPeripheral != peripheral {
-      os_log("Central will connect to: %@ at %d", peripheral, RSSI.intValue)
+      os_log("Central will connect to: %@ at %d", peripheral.name ?? "unnamed", RSSI.intValue)
       selectedPeripheral = peripheral
       central.connect(selectedPeripheral!, options: nil)
     }
@@ -66,21 +72,34 @@ extension BlueCentralManager: CBCentralManagerDelegate {
 
   public func centralManager(_ central: CBCentralManager,
                              didConnect peripheral: CBPeripheral) {
-    os_log("Central did connect")
+    os_log("Central connected peripheral")
     self.central.stopScan()
+
+    connectionCount += 1
+    writeCount = 0
+    data.removeAll(keepingCapacity: false)
+
     peripheral.delegate = self
-    peripheral.discoverServices(nil)
+    peripheral.discoverServices([PeripheralService.serviceUUID])
   }
 
   public func centralManager(_ central: CBCentralManager,
                              didFailToConnect peripheral: CBPeripheral,
                              error: Error?) {
-    os_log("Central failed to connect")
+    os_log("Central failed to connect to peripheral")
   }
+
   public func centralManager(_ central: CBCentralManager,
                              didDisconnectPeripheral peripheral: CBPeripheral,
                              error: Error?) {
-    os_log("Central did disconnect")
+    os_log("Central disconnected peripheral")
+    selectedPeripheral = nil
+    if connectionCount < maxActionCount {
+      os_log("Re-discover peripherals")
+      discoverPeripherals()
+    } else {
+      os_log("Connection count exceeded")
+    }
   }
   public func centralManager(_ central: CBCentralManager,
                              connectionEventDidOccur event: CBConnectionEvent,
