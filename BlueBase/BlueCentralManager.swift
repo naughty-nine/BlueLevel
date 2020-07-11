@@ -77,24 +77,20 @@ extension BlueCentralManager: CBCentralManagerDelegate {
                              error: Error?) {
     os_log("Central failed to connect")
   }
-
   public func centralManager(_ central: CBCentralManager,
                              didDisconnectPeripheral peripheral: CBPeripheral,
                              error: Error?) {
     os_log("Central did disconnect")
   }
-
   public func centralManager(_ central: CBCentralManager,
                              connectionEventDidOccur event: CBConnectionEvent,
                              for peripheral: CBPeripheral) {
     os_log("Central connection event")
   }
-
   public func centralManager(_ central: CBCentralManager,
                              didUpdateANCSAuthorizationFor peripheral: CBPeripheral) {
     os_log("Central did update ANCS authorization")
   }
-
   //public func centralManager(_ central: CBCentralManager,
   //                           willRestoreState dict: [String : Any]) {}
 }

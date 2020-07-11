@@ -133,30 +133,25 @@ extension BluePeripheralManager: CBPeripheralManagerDelegate {
                                 didReceiveRead request: CBATTRequest) {
     os_log("Peripheral did receive read")
   }
-
   public func peripheralManager(_ peripheral: CBPeripheralManager,
                                 didReceiveWrite requests: [CBATTRequest]) {
     os_log("Peripheral did receive write")
   }
-
   public func peripheralManager(_ peripheral: CBPeripheralManager,
                                 didPublishL2CAPChannel PSM: CBL2CAPPSM,
                                 error: Error?) {
     os_log("Peripheral did publish L2CAP channel")
   }
-
   public func peripheralManager(_ peripheral: CBPeripheralManager,
                                 didUnpublishL2CAPChannel PSM: CBL2CAPPSM,
                                 error: Error?) {
     os_log("Peripheral did unpublish L2CAP")
   }
-
   public func peripheralManager(_ peripheral: CBPeripheralManager,
                                 didOpen channel: CBL2CAPChannel?,
                                 error: Error?) {
     os_log("Peripheral did open L2CAP")
   }
-
   //public func peripheralManager(_ peripheral: CBPeripheralManager,
   //                              willRestoreState dict: [String : Any]) {
   //  os_log("Peripheral will restore state")
