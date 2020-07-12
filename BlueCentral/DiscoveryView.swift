@@ -21,13 +21,12 @@ struct DiscoveryView: View {
           .lineLimit(1)
       }
       HStack {
-        Text("Message")
+        Text("Last received Message:")
+        Spacer()
       }
+      Text(central.lastMessage)
     }
     .padding()
-    .onAppear {
-      let _ = central.central
-    }
   }
 }
 

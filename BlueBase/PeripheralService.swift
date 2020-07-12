@@ -10,4 +10,5 @@ public struct PeripheralService {
     CBAdvertisementDataServiceUUIDsKey: [PeripheralService.serviceUUID],
     CBAdvertisementDataLocalNameKey: PeripheralService.serviceName
   ]
+  public static let eom = "EOM"
 }

@@ -5,17 +5,26 @@ import os
 
 public class BlueCentralManager: NSObject, ObservableObject {
 
-  public private(set) lazy var central: CBCentralManager = {
-    CBCentralManager(delegate: self, queue: nil)
-  }()
+  // MARK: public / published
+  private var central: CBCentralManager
   @Published public private(set) var selectedPeripheral: CBPeripheral?
   @Published public private(set) var selectedCharacteristic: CBCharacteristic?
+  @Published public private(set) var lastMessage: String = ""
+
+  // MARK: private / internal
   private var connectionCount = 0
   private var writeCount = 0
   private let maxActionCount = 5
   private var data = Data()
 
-  func discoverPeripherals() {
+  override public init() {
+    central = CBCentralManager(delegate: nil, queue: nil)
+    super.init()
+    central.delegate = self
+  }
+
+
+  private func discoverPeripherals() {
     let connected = central
       .retrieveConnectedPeripherals(withServices: [PeripheralService.serviceUUID])
     if let lastConnected = connected.last {
@@ -28,7 +37,7 @@ public class BlueCentralManager: NSObject, ObservableObject {
     }
   }
 
-  func disconnectSelectedPeripheral() {
+  private func disconnectSelectedPeripheral() {
     guard let selected = selectedPeripheral,
           case .connected = selected.state else { return }
     for service in selected.services ?? [] {
@@ -43,6 +52,7 @@ public class BlueCentralManager: NSObject, ObservableObject {
   }
 }
 
+// MARK: - CBCentralManagerDelegate
 
 extension BlueCentralManager: CBCentralManagerDelegate {
 
@@ -64,7 +74,7 @@ extension BlueCentralManager: CBCentralManagerDelegate {
                              advertisementData: [String : Any],
                              rssi RSSI: NSNumber) {
     if selectedPeripheral != peripheral {
-      os_log("Central will connect to: %@ at %d", peripheral.name ?? "unnamed", RSSI.intValue)
+      os_log("CentralManager will connect to: %@ at %d", peripheral.name ?? "unnamed", RSSI.intValue)
       selectedPeripheral = peripheral
       central.connect(selectedPeripheral!, options: nil)
     }
@@ -101,6 +111,8 @@ extension BlueCentralManager: CBCentralManagerDelegate {
       os_log("Connection count exceeded")
     }
   }
+
+  // MARK: Not yet called
   public func centralManager(_ central: CBCentralManager,
                              connectionEventDidOccur event: CBConnectionEvent,
                              for peripheral: CBPeripheral) {
@@ -114,6 +126,7 @@ extension BlueCentralManager: CBCentralManagerDelegate {
   //                           willRestoreState dict: [String : Any]) {}
 }
 
+// MARK: - CBPeripheralDelegate
 
 extension BlueCentralManager: CBPeripheralDelegate {
 
@@ -123,11 +136,12 @@ extension BlueCentralManager: CBPeripheralDelegate {
 
   public func peripheral(_ peripheral: CBPeripheral,
                          didModifyServices invalidatedServices: [CBService]) {
-    for service in invalidatedServices
-    where service.uuid == PeripheralService.serviceUUID {
+    for service in invalidatedServices where service.uuid == PeripheralService.serviceUUID {
       os_log("Peripheral did invalidate services")
       peripheral.discoverServices([PeripheralService.serviceUUID])
     }
+    selectedCharacteristic = nil
+    lastMessage = ""
   }
 
   public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
@@ -169,10 +183,34 @@ extension BlueCentralManager: CBPeripheralDelegate {
     }
   }
 
-  public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-    os_log("Peripheral did update notifications")
+  public func peripheral(_ peripheral: CBPeripheral,
+                         didUpdateNotificationStateFor characteristic: CBCharacteristic,
+                         error: Error?) {
+    os_log("Peripheral did update notifications. Nothing to do.")
   }
 
+  public func peripheral(_ peripheral: CBPeripheral,
+                         didUpdateValueFor characteristic: CBCharacteristic,
+                         error: Error?) {
+    guard error == nil else {
+      os_log("Peripheral updated value for characteristic ERROR: %@", error!.localizedDescription)
+      discoverPeripherals()
+      return
+    }
+    guard let received = characteristic.value,
+          let string = String(data: received, encoding: .utf8) else {
+      os_log("Peripheral did update value for characteristic with unreadable data.")
+      return
+    }
+    os_log("Peripheral did update value for characteristic")
+    if string != PeripheralService.eom {
+      data.append(received)
+    } else {
+      lastMessage = String(data: data, encoding: .utf8) ?? ""
+    }
+  }
+
+  // MARK: Not yet uncalled
   public func peripheralDidUpdateRSSI(_ peripheral: CBPeripheral, error: Error?) {
     os_log("Peripheral did update RSSI")
   }
@@ -181,9 +219,6 @@ extension BlueCentralManager: CBPeripheralDelegate {
   }
   public func peripheral(_ peripheral: CBPeripheral, didDiscoverIncludedServicesFor service: CBService, error: Error?) {
     os_log("Peripheral did discover included services")
-  }
-  public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-    os_log("Peripheral did update value for characteristic")
   }
   public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
     os_log("Peripheral did write value for characteristic")

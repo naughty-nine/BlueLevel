@@ -51,7 +51,7 @@ public class BluePeripheralManager: NSObject, ObservableObject {
 
   private func sendData() {
     if shouldSendEom {
-      let didSend = peripheral.updateValue("EOM".data(using: .utf8)!,
+      let didSend = peripheral.updateValue(PeripheralService.eom.data(using: .utf8)!,
                                            for: characteristics,
                                            onSubscribedCentrals: nil)
       if didSend {
@@ -82,7 +82,7 @@ public class BluePeripheralManager: NSObject, ObservableObject {
       dataToSendIndex += amountToSend
       if dataToSendIndex >= dataToSend.count {
         shouldSendEom = true
-        let eomSent = peripheral.updateValue("EOM".data(using: .utf8)!,
+        let eomSent = peripheral.updateValue(PeripheralService.eom.data(using: .utf8)!,
                                              for: characteristics,
                                              onSubscribedCentrals: nil)
         if eomSent {
@@ -148,6 +148,7 @@ extension BluePeripheralManager: CBPeripheralManagerDelegate {
     isAdvertising = true
   }
 
+  // MARK: Not yet called
   public func peripheralManager(_ peripheral: CBPeripheralManager,
                                 didReceiveRead request: CBATTRequest) {
     os_log("Peripheral did receive read")
