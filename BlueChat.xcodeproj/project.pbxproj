@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D322C81024BA13C7001B61CD /* PeripheralService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D322C80F24BA13C7001B61CD /* PeripheralService.swift */; };
+		D322C81224BA6574001B61CD /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D322C81124BA6574001B61CD /* Constants.swift */; };
 		D3A56D5024B945C100163D7B /* BlueCentralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A56D4F24B945C100163D7B /* BlueCentralManager.swift */; };
 		D3A56D5224B9472300163D7B /* BluePeripheralManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A56D5124B9472300163D7B /* BluePeripheralManager.swift */; };
 		D3A56D5A24B9482A00163D7B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A56D5924B9482A00163D7B /* AppDelegate.swift */; };
@@ -74,6 +75,7 @@
 
 /* Begin PBXFileReference section */
 		D322C80F24BA13C7001B61CD /* PeripheralService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeripheralService.swift; sourceTree = "<group>"; };
+		D322C81124BA6574001B61CD /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		D3A56D4F24B945C100163D7B /* BlueCentralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueCentralManager.swift; sourceTree = "<group>"; };
 		D3A56D5124B9472300163D7B /* BluePeripheralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluePeripheralManager.swift; sourceTree = "<group>"; };
 		D3A56D5724B9482A00163D7B /* BlueCentral.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlueCentral.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -178,6 +180,7 @@
 				D3A56D4F24B945C100163D7B /* BlueCentralManager.swift */,
 				D3A56D5124B9472300163D7B /* BluePeripheralManager.swift */,
 				D322C80F24BA13C7001B61CD /* PeripheralService.swift */,
+				D322C81124BA6574001B61CD /* Constants.swift */,
 			);
 			path = BlueBase;
 			sourceTree = "<group>";
@@ -377,6 +380,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D322C81224BA6574001B61CD /* Constants.swift in Sources */,
 				D3DCF7E424B9163900312F0E /* CBManagerState+string.swift in Sources */,
 				D3A56D5024B945C100163D7B /* BlueCentralManager.swift in Sources */,
 				D3A56D5224B9472300163D7B /* BluePeripheralManager.swift in Sources */,

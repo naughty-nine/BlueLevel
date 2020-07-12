@@ -1,40 +1,55 @@
 
 import CoreBluetooth
 import os
+import SwiftUI
 
 
 public class BluePeripheralManager: NSObject, ObservableObject {
 
-  public private(set) lazy var peripheral: CBPeripheralManager = {
-    CBPeripheralManager(delegate: self, queue: nil, options: nil)
-  }()
-  private var characteristics: CBMutableCharacteristic?
-  private var connectedCentral: CBCentral?
+  // MARK: public / published
+  @Published public var isAdvertising: Bool = false {
+    didSet {
+      if isAdvertising {
+        peripheral.startAdvertising(PeripheralService.advertisement)
+      } else {
+        peripheral.stopAdvertising()
+      }
+    }
+  }
+  public var isAdvertisingBinding: Binding<Bool> {
+    Binding(get: { self.isAdvertising },
+            set: { self.isAdvertising = $0 })
+  }
+  @Published public var connectedCentralName: String = ""
+
+  // MARK: private / internal
+  private var peripheral: CBPeripheralManager
+  private var characteristics: CBMutableCharacteristic
+  private var connectedCentral: CBCentral? {
+    didSet { connectedCentralName = connectedCentral?.identifier.uuidString ?? "" }
+  }
   private var dataToSend = Data()
   private var dataToSendIndex = 0
   private var shouldSendEom = false
 
+  public override init() {
+    peripheral = CBPeripheralManager(delegate: nil, queue: nil, options: nil)
+    characteristics = CBMutableCharacteristic(type: PeripheralService.characteristicUUID,
+                                              properties: [.notify, .writeWithoutResponse],
+                                              value: nil,
+                                              permissions: [.readable, .writeable])
+    super.init()
+    peripheral.delegate = self
+  }
+
   private func setup() {
-    let characteristics
-      = CBMutableCharacteristic(type: PeripheralService.characteristicUUID,
-                                properties: [.notify, .writeWithoutResponse],
-                                value: nil,
-                                permissions: [.readable, .writeable])
     let service = CBMutableService(type: PeripheralService.serviceUUID, primary: true)
     service.characteristics = [characteristics]
     peripheral.add(service)
-    self.characteristics = characteristics
-    peripheral.startAdvertising(
-      [CBAdvertisementDataServiceUUIDsKey: [PeripheralService.serviceUUID],
-       CBAdvertisementDataLocalNameKey: PeripheralService.serviceName]
-    )
+    isAdvertising = true
   }
 
   private func sendData() {
-    guard let characteristics = characteristics else {
-      os_log("%@ : Error: Characteristics not set.", #function)
-      return
-    }
     if shouldSendEom {
       let didSend = peripheral.updateValue("EOM".data(using: .utf8)!,
                                            for: characteristics,
@@ -80,11 +95,12 @@ public class BluePeripheralManager: NSObject, ObservableObject {
   }
 }
 
+// MARK: - CBPeripheralManagerDelegate
 
 extension BluePeripheralManager: CBPeripheralManagerDelegate {
 
   public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-    os_log("Peripheral updated state: %@", peripheral.state.string)
+    os_log("PeripheralManager updated state: %@", peripheral.state.string)
     switch peripheral.state {
     case .unknown:      ()
     case .resetting:    ()
@@ -99,34 +115,37 @@ extension BluePeripheralManager: CBPeripheralManagerDelegate {
   public func peripheralManager(_ peripheral: CBPeripheralManager,
                                 didAdd service: CBService,
                                 error: Error?) {
-    os_log("Peripheral added service")
+    os_log("PeripheralManager added service. Nothing to do")
   }
 
   public func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager,
                                                    error: Error?) {
-    os_log("Peripheral started advertising")
+    os_log("PeripheralManager started advertising. Nothing to do.")
   }
 
   public func peripheralManager(_ peripheral: CBPeripheralManager,
                                 central: CBCentral,
                                 didSubscribeTo characteristic: CBCharacteristic) {
-    os_log("Central subscribed")
+    os_log("Central subscribed to PeripheralManager characteristic. Send initial data.")
     connectedCentral = central
+    isAdvertising = false
     dataToSend = "Pshhhhh. No sound".data(using: .utf8)!
+    dataToSend = Constants.Commentarii.text.data(using: .utf8)!
     dataToSendIndex = 0
     sendData()
   }
 
   public func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
-    os_log("Peripheral is ready to update")
+    os_log("PeripheralManager is ready to update. Continue send data.")
     sendData()
   }
 
   public func peripheralManager(_ peripheral: CBPeripheralManager,
                                 central: CBCentral,
                                 didUnsubscribeFrom characteristic: CBCharacteristic) {
-    os_log("Central did unsubscribe")
+    os_log("Central did unsubscribe from PeripheralManager.")
     connectedCentral = nil
+    isAdvertising = true
   }
 
   public func peripheralManager(_ peripheral: CBPeripheralManager,

@@ -7,11 +7,27 @@ struct AdvertisingView: View {
   @ObservedObject var peripheral: BluePeripheralManager
 
   var body: some View {
-    Text("Peripheral role is advertising: \(PeripheralService.serviceName)")
-      .onAppear {
-        let a = peripheral.peripheral
-        print(a.state)
+    VStack {
+      Text("Peripheral service: \(PeripheralService.serviceName)")
+      HStack {
+        Text("Is advertising:")
+        Toggle(isOn: peripheral.isAdvertisingBinding,
+               label: { isAdvertisingLabel })
       }
+      HStack {
+        Text("Central:")
+        Spacer()
+        Text(peripheral.connectedCentralName)
+      }
+    }
+    .padding()
+  }
+
+  var isAdvertisingLabel: some View {
+    HStack {
+      Spacer()
+      Text(peripheral.isAdvertising ? "yes" : "no")
+    }
   }
 }
 
