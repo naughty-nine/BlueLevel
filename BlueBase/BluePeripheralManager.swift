@@ -28,9 +28,17 @@ public class BluePeripheralManager: NSObject, ObservableObject {
   private var connectedCentral: CBCentral? {
     didSet { connectedCentralName = connectedCentral?.identifier.uuidString ?? "" }
   }
-  private var dataToSend = Data()
+  private var dataToSend = Data() {
+    didSet { dataToSendIndex = 0 }
+  }
   private var dataToSendIndex = 0
-  private var shouldSendEom = false
+  private var shouldSendEom = false {
+    didSet {
+      if !shouldSendEom {
+        dataToSend = Data()
+      }
+    }
+  }
 
   public override init() {
     peripheral = CBPeripheralManager(delegate: nil, queue: nil, options: nil)
@@ -51,12 +59,10 @@ public class BluePeripheralManager: NSObject, ObservableObject {
 
   private func sendData() {
     if shouldSendEom {
-      let didSend = peripheral.updateValue(PeripheralService.eom.data(using: .utf8)!,
-                                           for: characteristics,
-                                           onSubscribedCentrals: nil)
-      if didSend {
+      if sendEom() {
         shouldSendEom = false
         os_log("%@ : Sent EOM", #function)
+        return
       }
       // Didn't send. wait for peripheralManagerIsReadyToUpdateSubscribers to call sendData again
       return
@@ -82,16 +88,19 @@ public class BluePeripheralManager: NSObject, ObservableObject {
       dataToSendIndex += amountToSend
       if dataToSendIndex >= dataToSend.count {
         shouldSendEom = true
-        let eomSent = peripheral.updateValue(PeripheralService.eom.data(using: .utf8)!,
-                                             for: characteristics,
-                                             onSubscribedCentrals: nil)
-        if eomSent {
+        if sendEom() {
           shouldSendEom = false
           os_log("%@ : Sent EOM", #function)
         }
         return
       }
     }
+  }
+
+  private func sendEom() -> Bool {
+    peripheral.updateValue(PeripheralService.eom.data(using: .utf8)!,
+                           for: characteristics,
+                           onSubscribedCentrals: nil)
   }
 }
 
@@ -131,7 +140,6 @@ extension BluePeripheralManager: CBPeripheralManagerDelegate {
     isAdvertising = false
     dataToSend = "Pshhhhh. No sound".data(using: .utf8)!
     dataToSend = Constants.Commentarii.text.data(using: .utf8)!
-    dataToSendIndex = 0
     sendData()
   }
 
