@@ -1,5 +1,6 @@
 
 import CoreBluetooth
+import CoreMotion
 import os
 import SwiftUI
 
@@ -39,6 +40,7 @@ public class BluePeripheralManager: NSObject, ObservableObject {
       }
     }
   }
+  private var motionManager: CMMotionManager
 
   public override init() {
     peripheral = CBPeripheralManager(delegate: nil, queue: nil, options: nil)
@@ -46,6 +48,7 @@ public class BluePeripheralManager: NSObject, ObservableObject {
                                               properties: [.notify, .writeWithoutResponse],
                                               value: nil,
                                               permissions: [.readable, .writeable])
+    motionManager = CMMotionManager()
     super.init()
     peripheral.delegate = self
   }
@@ -102,6 +105,43 @@ public class BluePeripheralManager: NSObject, ObservableObject {
                            for: characteristics,
                            onSubscribedCentrals: nil)
   }
+
+  private func startMotion() {
+    guard motionManager.isDeviceMotionAvailable else {
+      os_log("%@ : DeviceMotion unavailable.", #function)
+      return
+    }
+    guard !motionManager.isDeviceMotionActive else  {
+      os_log("%@ : DeviceMotion already active", #function)
+      return
+    }
+    motionManager.deviceMotionUpdateInterval = 1.0 / 40
+    motionManager.startDeviceMotionUpdates(to: .main) { [weak self] (motion, error) in
+      guard error == nil else {
+        os_log("DeviceMotion update failed with %@", error!.localizedDescription)
+        return
+      }
+      guard let motion = motion else {
+        os_log("DeviceMotion data is nil.")
+        return
+      }
+      guard self?.dataToSend.isEmpty ?? false else {
+        os_log("PeripheralManager is busy sending data. Skip this datum.")
+        return
+      }
+      let level = LevelData(deviceMotion: motion)
+      guard let levelData = try? JSONEncoder().encode(level) else {
+        os_log("DeviceMotion data failed to encode.")
+        return
+      }
+      self?.dataToSend = levelData
+      self?.sendData()
+    }
+  }
+
+  private func stopMotion() {
+    motionManager.stopDeviceMotionUpdates()
+  }
 }
 
 // MARK: - CBPeripheralManagerDelegate
@@ -141,6 +181,7 @@ extension BluePeripheralManager: CBPeripheralManagerDelegate {
     dataToSend = "Pshhhhh. No sound".data(using: .utf8)!
     dataToSend = Constants.Commentarii.text.data(using: .utf8)!
     sendData()
+    startMotion()
   }
 
   public func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
@@ -153,6 +194,7 @@ extension BluePeripheralManager: CBPeripheralManagerDelegate {
                                 didUnsubscribeFrom characteristic: CBCharacteristic) {
     os_log("Central did unsubscribe from PeripheralManager.")
     connectedCentral = nil
+    stopMotion()
     isAdvertising = true
   }
 

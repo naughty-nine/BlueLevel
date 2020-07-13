@@ -9,7 +9,7 @@ public class BlueCentralManager: NSObject, ObservableObject {
   private var central: CBCentralManager
   @Published public private(set) var selectedPeripheral: CBPeripheral?
   @Published public private(set) var selectedCharacteristic: CBCharacteristic?
-  @Published public private(set) var lastMessage: String = ""
+  @Published public private(set) var lastLevelData: LevelData? = nil
 
   // MARK: private / internal
   private var connectionCount = 0
@@ -141,7 +141,7 @@ extension BlueCentralManager: CBPeripheralDelegate {
       peripheral.discoverServices([PeripheralService.serviceUUID])
     }
     selectedCharacteristic = nil
-    lastMessage = ""
+    lastLevelData = nil
   }
 
   public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
@@ -206,7 +206,12 @@ extension BlueCentralManager: CBPeripheralDelegate {
     if string != PeripheralService.eom {
       data.append(received)
     } else {
-      lastMessage = String(data: data, encoding: .utf8) ?? ""
+      if let levelData = try? JSONDecoder().decode(LevelData.self, from: data) {
+        lastLevelData = levelData
+      } else {
+        lastLevelData = nil
+      }
+      data.removeAll(keepingCapacity: false)
     }
   }
 
