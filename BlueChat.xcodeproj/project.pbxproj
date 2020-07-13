@@ -78,6 +78,7 @@
 		D322C80F24BA13C7001B61CD /* PeripheralService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeripheralService.swift; sourceTree = "<group>"; };
 		D322C81124BA6574001B61CD /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		D322C81324BBDBC4001B61CD /* LevelData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelData.swift; sourceTree = "<group>"; };
+		D322C81824BCB3E1001B61CD /* BlueCentral.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BlueCentral.entitlements; sourceTree = "<group>"; };
 		D3A56D4F24B945C100163D7B /* BlueCentralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueCentralManager.swift; sourceTree = "<group>"; };
 		D3A56D5124B9472300163D7B /* BluePeripheralManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluePeripheralManager.swift; sourceTree = "<group>"; };
 		D3A56D5724B9482A00163D7B /* BlueCentral.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlueCentral.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -132,6 +133,7 @@
 		D3A56D5824B9482A00163D7B /* BlueCentral */ = {
 			isa = PBXGroup;
 			children = (
+				D322C81824BCB3E1001B61CD /* BlueCentral.entitlements */,
 				D3A56D5924B9482A00163D7B /* AppDelegate.swift */,
 				D3A56D5B24B9482A00163D7B /* SceneDelegate.swift */,
 				D3A56D5D24B9482A00163D7B /* DiscoveryView.swift */,
@@ -432,6 +434,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BlueCentral/BlueCentral.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"BlueCentral/Preview Content\"";
 				DEVELOPMENT_TEAM = KC3BF8K2D9;
@@ -444,6 +447,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = de.gendo.app.BlueCentral;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -454,6 +458,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BlueCentral/BlueCentral.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"BlueCentral/Preview Content\"";
 				DEVELOPMENT_TEAM = KC3BF8K2D9;
@@ -466,6 +471,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = de.gendo.app.BlueCentral;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
