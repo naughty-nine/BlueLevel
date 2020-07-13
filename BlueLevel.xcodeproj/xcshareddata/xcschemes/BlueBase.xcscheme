@@ -14,24 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D3DCF7A824B9115D00312F0E"
-               BuildableName = "BluePeripheral.app"
-               BlueprintName = "BluePeripheral"
-               ReferencedContainer = "container:BlueChat.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "D3DCF7C424B915DC00312F0E"
                BuildableName = "BlueBase.framework"
                BlueprintName = "BlueBase"
-               ReferencedContainer = "container:BlueChat.xcodeproj">
+               ReferencedContainer = "container:BlueLevel.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -54,16 +40,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D3DCF7A824B9115D00312F0E"
-            BuildableName = "BluePeripheral.app"
-            BlueprintName = "BluePeripheral"
-            ReferencedContainer = "container:BlueChat.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -71,16 +47,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D3DCF7A824B9115D00312F0E"
-            BuildableName = "BluePeripheral.app"
-            BlueprintName = "BluePeripheral"
-            ReferencedContainer = "container:BlueChat.xcodeproj">
+            BlueprintIdentifier = "D3DCF7C424B915DC00312F0E"
+            BuildableName = "BlueBase.framework"
+            BlueprintName = "BlueBase"
+            ReferencedContainer = "container:BlueLevel.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:BlueChat.xcodeproj">
+      location = "self:/Users/gendo/source/BlueChat/BlueLevel.xcodeproj">
    </FileRef>
 </Workspace>

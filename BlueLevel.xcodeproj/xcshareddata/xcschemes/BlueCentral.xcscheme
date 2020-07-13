@@ -17,7 +17,7 @@
                BlueprintIdentifier = "D3A56D5624B9482A00163D7B"
                BuildableName = "BlueCentral.app"
                BlueprintName = "BlueCentral"
-               ReferencedContainer = "container:BlueChat.xcodeproj">
+               ReferencedContainer = "container:BlueLevel.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,7 +47,7 @@
             BlueprintIdentifier = "D3A56D5624B9482A00163D7B"
             BuildableName = "BlueCentral.app"
             BlueprintName = "BlueCentral"
-            ReferencedContainer = "container:BlueChat.xcodeproj">
+            ReferencedContainer = "container:BlueLevel.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -64,7 +64,7 @@
             BlueprintIdentifier = "D3A56D5624B9482A00163D7B"
             BuildableName = "BlueCentral.app"
             BlueprintName = "BlueCentral"
-            ReferencedContainer = "container:BlueChat.xcodeproj">
+            ReferencedContainer = "container:BlueLevel.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

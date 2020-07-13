@@ -310,7 +310,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D3DD6C0924B8E4A000822337 /* Build configuration list for PBXProject "BlueChat" */;
+			buildConfigurationList = D3DD6C0924B8E4A000822337 /* Build configuration list for PBXProject "BlueLevel" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -728,7 +728,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D3DD6C0924B8E4A000822337 /* Build configuration list for PBXProject "BlueChat" */ = {
+		D3DD6C0924B8E4A000822337 /* Build configuration list for PBXProject "BlueLevel" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D3DD6C2E24B8E4A100822337 /* Debug */,
